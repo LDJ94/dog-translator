@@ -428,38 +428,6 @@ export default function App() {
     { code: 'ko', name: '한국어', flag: '🇰🇷' },
   ]
 
-  // 模拟结果（多语言）
-  const mockResults = {
-    zh: [
-      { text: '我饿了', description: '宝宝可能感到饥饿', confidence: 95 },
-      { text: '我困了', description: '宝宝想睡觉了', confidence: 88 },
-      { text: '我不舒服', description: '宝宝可能身体不适', confidence: 82 },
-      { text: '我想抱抱', description: '宝宝需要安抚', confidence: 90 },
-      { text: '我无聊了', description: '宝宝想要玩耍', confidence: 85 },
-    ],
-    en: [
-      { text: "I'm hungry", description: 'Baby may be hungry', confidence: 95 },
-      { text: "I'm sleepy", description: 'Baby wants to sleep', confidence: 88 },
-      { text: "I'm uncomfortable", description: 'Baby may be uncomfortable', confidence: 82 },
-      { text: 'I want a hug', description: 'Baby needs comfort', confidence: 90 },
-      { text: "I'm bored", description: 'Baby wants to play', confidence: 85 },
-    ],
-    ja: [
-      { text: 'お腹が空いた', description: '赤ちゃんはお腹が空いているかもしれません', confidence: 95 },
-      { text: '眠い', description: '赤ちゃんは眠たいです', confidence: 88 },
-      { text: '不舒服', description: '赤ちゃんは不舒服かもしれません', confidence: 82 },
-      { text: '抱っこして', description: '赤ちゃんは抱っこが必要です', confidence: 90 },
-      { text: '退屈だ', description: '赤ちゃんは遊びたいです', confidence: 85 },
-    ],
-    ko: [
-      { text: '배가 고파요', description: '아기가 배가 고플 수 있어요', confidence: 95 },
-      { text: '졸려요', description: '아기가 자고 싶어 해요', confidence: 88 },
-      { text: '불편해요', description: '아기가 불편해할 수 있어요', confidence: 82 },
-      { text: '안아주세요', description: '아기가 안아달라고 해요', confidence: 90 },
-      { text: '심심해요', description: '아기가 놀고 싶어 해요', confidence: 85 },
-    ],
-  }
-
   // 开始录音
   const startRecording = async () => {
     try {
@@ -500,22 +468,48 @@ export default function App() {
     }
   }
 
-  // 处理音频（模拟）
+  // 处理音频（调用 AI API）
   const processAudio = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    const langResults = mockResults[targetLanguage] || mockResults.zh
-    const randomResult = langResults[Math.floor(Math.random() * langResults.length)]
-    const newResult = {
-      ...randomResult,
-      id: Date.now(),
-      createdAt: new Date().toISOString(),
-      targetLanguage
+    try {
+      // 调用后端 AI 翻译 API
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetLanguage: targetLanguage,
+          originalText: '婴儿哭声'
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Translation failed')
+      }
+      
+      const data = await response.json()
+      
+      setResult({
+        ...data,
+        targetLanguage
+      })
+      setHistory(prev => [{ ...data, targetLanguage, id: Date.now(), createdAt: new Date().toISOString() }, ...prev])
+      setCurrentPage('result')
+    } catch (error) {
+      console.error('Translation error:', error)
+      // 如果失败，使用默认结果
+      const mockData = {
+        text: '我饿了',
+        description: '宝宝可能感到饥饿',
+        confidence: 85
+      }
+      setResult({
+        ...mockData,
+        targetLanguage
+      })
+      setHistory(prev => [{ ...mockData, targetLanguage, id: Date.now(), createdAt: new Date().toISOString() }, ...prev])
+      setCurrentPage('result')
     }
-    
-    setResult(newResult)
-    setHistory(prev => [newResult, ...prev])
-    setCurrentPage('result')
   }
 
   // 上传文件

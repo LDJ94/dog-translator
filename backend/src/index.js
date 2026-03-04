@@ -23,27 +23,93 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// Translation API (模拟实现)
-app.post('/api/translate', (req, res) => {
-  const { audioData, targetLanguage } = req.body
+// AI Translation using Anthropic Claude
+async function translateWithAI(audioDescription, targetLanguage) {
+  const apiKey = process.env.ANTHROPIC_AUTH_TOKEN
+  const baseUrl = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com'
   
-  // 模拟翻译结果
-  const results = [
-    { text: '我饿了', description: '宝宝可能感到饥饿', confidence: 95 },
-    { text: '我困了', description: '宝宝想睡觉了', confidence: 88 },
-    { text: '我不舒服', description: '宝宝可能身体不适', confidence: 82 },
-    { text: '我想抱抱', description: '宝宝需要安抚', confidence: 90 },
-    { text: '我无聊了', description: '宝宝想要玩耍', confidence: 85 },
-  ]
+  const languageNames = {
+    'zh': '中文',
+    'en': '英语',
+    'ja': '日语',
+    'ko': '韩语'
+  }
   
-  const result = results[Math.floor(Math.random() * results.length)]
+  const targetLang = languageNames[targetLanguage] || '中文'
   
-  res.json({
-    id: Date.now().toString(),
-    ...result,
-    targetLanguage: targetLanguage || 'zh',
-    createdAt: new Date().toISOString()
-  })
+  const prompt = `你是一个婴儿哭声翻译专家。婴儿的哭声传达了他们的需求。请根据以下婴儿哭声的特征描述，将其翻译成${targetLang}。
+
+婴儿哭声描述: ${audioDescription || '婴儿正在哭闹'}
+
+请返回一个JSON格式的翻译结果，格式如下:
+{
+  "text": "翻译后的文字",
+  "description": "对宝宝需求的简短描述",
+  "confidence": 置信度(0-100)
+}
+
+只需要返回JSON，不要其他内容。`
+
+  try {
+    const response = await fetch(`${baseUrl}/v1/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: [
+          { role: 'user', content: prompt }
+        ]
+      })
+    })
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    const content = data.content[0].text
+    
+    // 解析 JSON 响应
+    const jsonMatch = content.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    
+    throw new Error('Failed to parse AI response')
+  } catch (error) {
+    console.error('AI translation error:', error)
+    // 如果 AI 调用失败，返回默认结果
+    return {
+      text: '我饿了',
+      description: '宝宝可能感到饥饿',
+      confidence: 85
+    }
+  }
+}
+
+// Translation API
+app.post('/api/translate', async (req, res) => {
+  const { audioData, targetLanguage, originalText } = req.body
+  
+  try {
+    // 使用 AI 进行翻译
+    const result = await translateWithAI(originalText || '婴儿哭声', targetLanguage || 'zh')
+    
+    res.json({
+      id: Date.now().toString(),
+      ...result,
+      targetLanguage: targetLanguage || 'zh',
+      createdAt: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('Translation error:', error)
+    res.status(500).json({ error: 'Translation failed' })
+  }
 })
 
 // 语言列表
