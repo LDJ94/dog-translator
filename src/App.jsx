@@ -147,7 +147,14 @@ function RecordingPage({ isRecording, onStop, onCancel, recordingTime }) {
 }
 
 // 结果页
-function ResultPage({ result, onPlayAudio, onRetry, targetLanguage, setTargetLanguage, languages, isPlaying }) {
+function ResultPage({ result, onPlayAudio, onRetry, targetLanguage, setTargetLanguage, languages, isPlaying, onLanguageChange }) {
+  const handleLanguageChange = (langCode) => {
+    setTargetLanguage(langCode)
+    if (onLanguageChange) {
+      onLanguageChange(langCode)
+    }
+  }
+  
   return (
     <div className="flex flex-col items-center px-5 py-6 min-h-screen">
       <div className="w-full bg-gradient-to-br from-pink-100 via-white to-blue-100 p-6 rounded-2xl shadow-lg shadow-pink-100 mb-6">
@@ -175,7 +182,7 @@ function ResultPage({ result, onPlayAudio, onRetry, targetLanguage, setTargetLan
           {languages.map(lang => (
             <button
               key={lang.code}
-              onClick={() => setTargetLanguage(lang.code)}
+              onClick={() => handleLanguageChange(lang.code)}
               className={`py-2.5 px-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 targetLanguage === lang.code
                   ? 'bg-pink-500 text-white shadow-md shadow-pink-200'
@@ -288,6 +295,35 @@ function ParentingTipsPage() {
 
 // 设置页
 function SettingsPage() {
+  const [avatar, setAvatar] = useState(null)
+  
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setAvatar(e.target.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+  
+  const handleBindPhone = () => {
+    alert('绑定手机功能开发中...')
+  }
+  
+  const handleBindWechat = () => {
+    alert('微信绑定功能开发中...')
+  }
+  
+  const handleBindDouyin = () => {
+    alert('抖音绑定功能开发中...')
+  }
+  
+  const handleBindXiaohongshu = () => {
+    alert('小红书绑定功能开发中...')
+  }
+  
   return (
     <div className="px-4 py-4 pb-24">
       <h2 className="text-xl font-bold text-gray-800 mb-4">设置</h2>
@@ -295,12 +331,22 @@ function SettingsPage() {
       {/* 用户头像和信息 */}
       <div className="bg-white rounded-xl shadow-sm border border-pink-50 p-4 mb-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-pink-200 to-blue-200 rounded-full flex items-center justify-center">
-            <span className="material-symbols-outlined text-3xl text-pink-500">person</span>
-          </div>
+          <label className="cursor-pointer relative">
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-200 to-blue-200 rounded-full flex items-center justify-center overflow-hidden">
+              {avatar ? (
+                <img src={avatar} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="material-symbols-outlined text-3xl text-pink-500">person</span>
+              )}
+            </div>
+            <div className="absolute bottom-0 right-0 w-6 h-6 bg-pink-500 rounded-full flex items-center justify-center">
+              <span className="material-symbols-outlined text-white text-sm">camera_alt</span>
+            </div>
+            <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+          </label>
           <div>
             <h3 className="font-semibold text-gray-800">用户</h3>
-            <p className="text-sm text-gray-500">未绑定手机号</p>
+            <p className="text-sm text-gray-500">点击头像更换照片</p>
           </div>
         </div>
       </div>
@@ -311,28 +357,28 @@ function SettingsPage() {
           <h3 className="font-semibold text-gray-700">账号关联</h3>
         </div>
         <div className="p-2">
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button onClick={handleBindPhone} className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
             <div className="flex items-center gap-3">
               <span className="text-xl">📱</span>
               <span className="text-gray-700">手机号</span>
             </div>
             <span className="material-symbols-outlined text-gray-400">chevron_right</span>
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button onClick={handleBindWechat} className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
             <div className="flex items-center gap-3">
               <span className="text-xl">💬</span>
               <span className="text-gray-700">微信</span>
             </div>
             <span className="text-gray-400 text-sm">未绑定</span>
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button onClick={handleBindDouyin} className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
             <div className="flex items-center gap-3">
               <span className="text-xl">🎵</span>
               <span className="text-gray-700">抖音</span>
             </div>
             <span className="text-gray-400 text-sm">未绑定</span>
           </button>
-          <button className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+          <button onClick={handleBindXiaohongshu} className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
             <div className="flex items-center gap-3">
               <span className="text-xl">📕</span>
               <span className="text-gray-700">小红书</span>
@@ -576,6 +622,17 @@ export default function App() {
             setTargetLanguage={setTargetLanguage}
             languages={languages}
             isPlaying={isPlaying}
+            onLanguageChange={(langCode) => {
+              // 当用户切换语言时，重新生成对应语言的结果
+              const langResults = mockResults[langCode] || mockResults.zh
+              const randomResult = langResults[Math.floor(Math.random() * langResults.length)]
+              setResult({
+                ...randomResult,
+                id: Date.now(),
+                createdAt: new Date().toISOString(),
+                targetLanguage: langCode
+              })
+            }}
           />
         )
       case 'history':
