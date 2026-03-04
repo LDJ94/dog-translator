@@ -1,7 +1,6 @@
 {
   "build": {
-    "builder": "nixpacks",
-    "installCommand": "cd backend && npm install"
+    "builder": "docker"
   },
   "deploy": {
     "command": "cd backend && npm start"
