@@ -128,7 +128,7 @@ function RecordingPage({ isRecording, onStop, onCancel, recordingTime }) {
           onClick={onCancel}
           className="w-14 h-14 flex items-center justify-center bg-gray-100 text-gray-500 rounded-full active:scale-90 transition-all hover:bg-gray-200"
         >
-          <span className="material-symbols-outlined text-2xl">close</span>
+          <span className="material-symbols-outlined text-2xl">arrow_back</span>
         </button>
         
         <button 
@@ -139,7 +139,7 @@ function RecordingPage({ isRecording, onStop, onCancel, recordingTime }) {
               : 'bg-pink-500 text-white hover:bg-pink-600'
           }`}
         >
-          <span className="material-symbols-outlined text-4xl">stop</span>
+          <span className="material-symbols-outlined text-4xl">{isRecording ? 'stop' : 'mic'}</span>
         </button>
       </div>
     </div>
@@ -188,7 +188,7 @@ function ResultPage({ result, onPlayAudio, onRetry, targetLanguage, setTargetLan
         </div>
       </div>
       
-      <div className="w-full flex gap-3">
+      <div className="w-full flex justify-center">
         <button 
           onClick={onPlayAudio}
           disabled={isPlaying}
@@ -196,13 +196,6 @@ function ResultPage({ result, onPlayAudio, onRetry, targetLanguage, setTargetLan
         >
           <span className="material-symbols-outlined">{isPlaying ? 'stop' : 'volume_up'}</span>
           <span className="font-semibold">{isPlaying ? '停止播放' : '语音播放'}</span>
-        </button>
-        
-        <button 
-          onClick={onRetry}
-          className="flex items-center justify-center gap-2 py-3.5 px-4 bg-gray-100 text-gray-600 rounded-xl active:scale-95 transition-all duration-200 hover:bg-gray-200"
-        >
-          <span className="material-symbols-outlined">refresh</span>
         </button>
       </div>
     </div>
@@ -415,10 +408,35 @@ export default function App() {
     }
     
     const utterance = new SpeechSynthesisUtterance(result.text)
-    utterance.lang = targetLanguage === 'zh' ? 'zh-CN' : 
-                     targetLanguage === 'en' ? 'en-US' : 
-                     targetLanguage === 'ja' ? 'ja-JP' : 'ko-KR'
+    
+    // 设置语言
+    const langMap = {
+      'zh': 'zh-CN',
+      'en': 'en-US', 
+      'ja': 'ja-JP',
+      'ko': 'ko-KR'
+    }
+    utterance.lang = langMap[targetLanguage] || 'zh-CN'
     utterance.rate = 0.9
+    utterance.pitch = 1.1
+    
+    // 尝试获取可用的语音
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices()
+      const matchedVoice = voices.find(v => v.lang.startsWith(targetLanguage))
+      if (matchedVoice) {
+        utterance.voice = matchedVoice
+      }
+    }
+    
+    // 语音加载完成后播放
+    if (window.speechSynthesis.getVoices().length > 0) {
+      loadVoices()
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => {
+        loadVoices()
+      }
+    }
     
     utterance.onend = () => setIsPlaying(false)
     utterance.onerror = () => setIsPlaying(false)
