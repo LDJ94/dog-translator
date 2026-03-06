@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+<<<<<<< HEAD
 body {
   font-family: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
   background: linear-gradient(135deg, #fff7ed 0%, #fdf8f6 100%);
@@ -37,4 +38,21 @@ body {
   @apply w-full px-4 py-3 rounded-2xl border-2 border-warm-200 
          focus:border-warm-400 focus:outline-none transition-colors
          bg-white/90;
+=======
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif;
+  background-color: #fcf8f8;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+>>>>>>> c7dfee4daf7d2a508ae354230d23a0b9b1b9d269
 }

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 /** @type {import('tailwindcss').Config} */
+=======
+>>>>>>> c7dfee4daf7d2a508ae354230d23a0b9b1b9d269
 export default {
   content: [
     "./index.html",
@@ -7,6 +10,7 @@ export default {
   theme: {
     extend: {
       colors: {
+<<<<<<< HEAD
         warm: {
           50: '#fff7ed',
           100: '#ffedd5',
@@ -43,6 +47,17 @@ export default {
           '50%': { transform: 'scaleY(1)' },
         }
       }
+=======
+        primary: "#ee2b5b",
+        "background-light": "#fcf8f8",
+        "accent-blue": "#e0f2fe",
+        "accent-pink": "#fce7f3",
+        "accent-yellow": "#fef3c7",
+      },
+      fontFamily: {
+        display: ["Plus Jakarta Sans", "Noto Sans SC", "sans-serif"],
+      },
+>>>>>>> c7dfee4daf7d2a508ae354230d23a0b9b1b9d269
     },
   },
   plugins: [],
