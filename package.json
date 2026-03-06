@@ -1,5 +1,5 @@
 {
-  "name": "baby-translator",
+  "name": "dog-translator",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,20 +7,23 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node backend/src/index.js",
-    "start:prod": "node backend/src/index.js"
+    "start": "node server.cjs"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.2.0",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
     "vite": "^5.4.21"
   }
 }
