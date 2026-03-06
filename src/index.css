@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+  background: linear-gradient(135deg, #fff7ed 0%, #fdf8f6 100%);
+  min-height: 100vh;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #ffedd5;
+}
+::-webkit-scrollbar-thumb {
+  background: #fdba74;
+  border-radius: 4px;
+}
+
+/* 按钮悬停效果 */
+.btn-primary {
+  @apply bg-warm-500 hover:bg-warm-600 text-white font-bold py-3 px-8 rounded-full 
+         transition-all duration-300 transform hover:scale-105 shadow-lg 
+         hover:shadow-warm-500/50;
+}
+
+/* 卡片样式 */
+.card {
+  @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border-2 border-warm-100;
+}
+
+/* 输入框样式 */
+.input-field {
+  @apply w-full px-4 py-3 rounded-2xl border-2 border-warm-200 
+         focus:border-warm-400 focus:outline-none transition-colors
+         bg-white/90;
+}
